@@ -280,6 +280,15 @@ type TLSConfig struct {
 
 	// The server name (SNI) to use in TLS handshakes.
 	ServerName string `json:"server_name,omitempty"`
+
+	// MinVersion contains the minimum TLS version that is acceptable.
+	// If empty, TLS 1.0 is currently taken as the minimum.
+	MinVersion string `json:"min_version,omitempty"`
+
+	// MaxVersion contains the maximum TLS version that is acceptable.
+	// If empty, the maximum version supported by this package is used,
+	// which is currently TLS 1.3.
+	MaxVersion string `json:"max_version, omitempty"`
 }
 
 // MakeTLSClientConfig returns a tls.Config usable by a client to a backend.
@@ -350,6 +359,24 @@ func (t TLSConfig) MakeTLSClientConfig(ctx caddy.Context) (*tls.Config, error) {
 
 	// throw all security out the window
 	cfg.InsecureSkipVerify = t.InsecureSkipVerify
+
+	if t.MinVersion != "" {
+		if protoId, ok := caddytls.SupportedProtocols[t.MinVersion]; ok {
+			cfg.MinVersion = protoId
+			fmt.Printf("min ver: %v", protoId)
+		} else {
+			return nil, fmt.Errorf("unsupported tls min version: %s", t.MinVersion)
+		}
+	}
+
+	if t.MaxVersion != "" {
+		if protoId, ok := caddytls.SupportedProtocols[t.MaxVersion]; ok {
+			cfg.MaxVersion = protoId
+			fmt.Printf("max ver: %v", protoId)
+		} else {
+			return nil, fmt.Errorf("unsupported tls max version: %s", t.MaxVersion)
+		}
+	}
 
 	// only return a config if it's not empty
 	if reflect.DeepEqual(cfg, new(tls.Config)) {
