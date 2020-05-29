@@ -762,6 +762,24 @@ func (h *HTTPTransport) UnmarshalCaddyfile(d *caddyfile.Dispenser) error {
 				}
 				h.TLS.ServerName = d.Val()
 
+			case "tls_min_version":
+				if !d.NextArg() {
+					return d.ArgErr()
+				}
+				if h.TLS == nil {
+					h.TLS = new(TLSConfig)
+				}
+				h.TLS.MinVersion = d.Val()
+
+			case "tls_max_version":
+				if !d.NextArg() {
+					return d.ArgErr()
+				}
+				if h.TLS == nil {
+					h.TLS = new(TLSConfig)
+				}
+				h.TLS.MaxVersion = d.Val()
+
 			case "keepalive":
 				if !d.NextArg() {
 					return d.ArgErr()
