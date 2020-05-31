@@ -97,8 +97,10 @@ func (st ServerType) Setup(inputServerBlocks []caddyfile.ServerBlock,
 		"{tls_version}", "{http.request.tls.version}",
 		"{tls_client_fingerprint}", "{http.request.tls.client.fingerprint}",
 		"{tls_client_issuer}", "{http.request.tls.client.issuer}",
+		"{tls_client_issuer_cn}", "{http.request.tls.client.issuer.cn}",
 		"{tls_client_serial}", "{http.request.tls.client.serial}",
 		"{tls_client_subject}", "{http.request.tls.client.subject}",
+		"{tls_client_subject_cn}", "{http.request.tls.client.subject.cn}",
 	)
 
 	// these are placeholders that allow a user-defined final
