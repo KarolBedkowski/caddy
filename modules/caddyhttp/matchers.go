@@ -133,6 +133,9 @@ type (
 		MatcherSetsRaw []caddy.ModuleMap `json:"-" caddy:"namespace=http.matchers"`
 		MatcherSets    []MatcherSet      `json:"-"`
 	}
+
+	// MatchClient matches requests by the client certificate common name value.
+	MatchClientCertCN []string
 )
 
 func init() {
@@ -146,6 +149,7 @@ func init() {
 	caddy.RegisterModule(new(MatchProtocol))
 	caddy.RegisterModule(MatchRemoteIP{})
 	caddy.RegisterModule(MatchNot{})
+	caddy.RegisterModule(MatchClientCertCN{})
 }
 
 // CaddyModule returns the Caddy module information.
@@ -896,6 +900,43 @@ func (rm ResponseMatcher) matchStatusCode(statusCode int) bool {
 	return false
 }
 
+// CaddyModule returns the Caddy module information.
+func (MatchClientCertCN) CaddyModule() caddy.ModuleInfo {
+	return caddy.ModuleInfo{
+		ID:  "http.matchers.client_cert_cn",
+		New: func() caddy.Module { return new(MatchClientCertCN) },
+	}
+}
+
+// UnmarshalCaddyfile implements caddyfile.Unmarshaler.
+func (m *MatchClientCertCN) UnmarshalCaddyfile(d *caddyfile.Dispenser) error {
+	for d.Next() {
+		*m = append(*m, d.RemainingArgs()...)
+		if d.NextBlock(0) {
+			return d.Err("malformed cn matcher: blocks are not supported")
+		}
+	}
+	return nil
+}
+
+// Match returns true if r matches m.
+func (m MatchClientCertCN) Match(r *http.Request) bool {
+	if r.TLS == nil || len(r.TLS.PeerCertificates) == 0 {
+		return false
+	}
+
+	cert := r.TLS.PeerCertificates[0]
+	clientCN := cert.Subject.CommonName
+
+	for _, cn := range m {
+		if clientCN == cn {
+			return true
+		}
+	}
+
+	return false
+}
+
 var wordRE = regexp.MustCompile(`\w+`)
 
 const regexpPlaceholderPrefix = "http.regexp"
@@ -917,6 +958,7 @@ var (
 	_ RequestMatcher    = (*MatchNot)(nil)
 	_ caddy.Provisioner = (*MatchNot)(nil)
 	_ caddy.Provisioner = (*MatchRegexp)(nil)
+	_ RequestMatcher    = (*MatchClientCertCN)(nil)
 
 	_ caddyfile.Unmarshaler = (*MatchHost)(nil)
 	_ caddyfile.Unmarshaler = (*MatchPath)(nil)
@@ -927,6 +969,7 @@ var (
 	_ caddyfile.Unmarshaler = (*MatchHeaderRE)(nil)
 	_ caddyfile.Unmarshaler = (*MatchProtocol)(nil)
 	_ caddyfile.Unmarshaler = (*MatchRemoteIP)(nil)
+	_ caddyfile.Unmarshaler = (*MatchClientCertCN)(nil)
 
 	_ json.Marshaler   = (*MatchNot)(nil)
 	_ json.Unmarshaler = (*MatchNot)(nil)
