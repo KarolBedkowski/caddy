@@ -11,6 +11,7 @@ require (
 	github.com/go-acme/lego/v3 v3.7.0
 	github.com/go-chi/chi v4.1.2+incompatible
 	github.com/google/cel-go v0.5.1
+	github.com/hairyhenderson/caddyprom v0.0.0-20200702002946-7c8f282ca75c // indirect
 	github.com/jsternberg/zap-logfmt v1.2.0
 	github.com/klauspost/compress v1.10.10
 	github.com/klauspost/cpuid v1.3.0
