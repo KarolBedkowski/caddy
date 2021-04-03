@@ -340,6 +340,8 @@ func getReqTLSReplacement(req *http.Request, key string) (interface{}, bool) {
 			return fmt.Sprintf("%x", pubKeyBytes), true
 		case "client.issuer":
 			return cert.Issuer, true
+		case "client.issuer.cn":
+			return cert.Issuer.CommonName, true
 		case "client.serial":
 			return cert.SerialNumber, true
 		case "client.subject":
@@ -347,6 +349,8 @@ func getReqTLSReplacement(req *http.Request, key string) (interface{}, bool) {
 		case "client.certificate_pem":
 			block := pem.Block{Type: "CERTIFICATE", Bytes: cert.Raw}
 			return pem.EncodeToMemory(&block), true
+		case "client.subject.cn":
+			return cert.Subject.CommonName, true
 		default:
 			return nil, false
 		}

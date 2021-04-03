@@ -144,6 +144,10 @@ eqp31wM9il1n+guTNyxJd+FzVAH+hCZE5K+tCgVDdVFUlDEHHbS/wqb2PSIoouLV
 			expect: "CN=Caddy Test CA",
 		},
 		{
+			input:  "{http.request.tls.client.issuer.cn}",
+			expect: "Caddy Test CA",
+		},
+		{
 			input:  "{http.request.tls.client.serial}",
 			expect: "2",
 		},
@@ -173,7 +177,11 @@ eqp31wM9il1n+guTNyxJd+FzVAH+hCZE5K+tCgVDdVFUlDEHHbS/wqb2PSIoouLV
 		},
 		{
 			input:  "{http.request.tls.client.certificate_pem}",
-			expect: string(clientCert) + "\n",  // returned value comes with a newline appended to it
+			expect: string(clientCert) + "\n", // returned value comes with a newline appended to it
+		},
+		{
+			input:  "{http.request.tls.client.subject.cn}",
+			expect: "client.localdomain",
 		},
 	} {
 		actual := repl.ReplaceAll(tc.input, "<empty>")
